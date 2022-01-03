@@ -124,7 +124,7 @@ function App() {
     skip
   });
   React.useEffect(() => {
-    console.log({skip, data})
+    console.log(new Date(), {skip, data})
   }, [skip, data]);
 
   const [addPerson] = useMutation(ADD_PERSON, {
