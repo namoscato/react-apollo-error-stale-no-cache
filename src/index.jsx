@@ -25,7 +25,10 @@ const QueryType = new GraphQLObjectType({
   fields: {
     people: {
       type: new GraphQLList(PersonType),
-      resolve: () => peopleData,
+      resolve: async () => {
+        await delay(1000);
+        return peopleData
+      },
     },
   },
 });
@@ -112,10 +115,17 @@ const ADD_PERSON = gql`
 
 function App() {
   const [name, setName] = useState('');
+  const [skip, setSkip] = useState(false);
   const {
     loading,
     data,
-  } = useQuery(ALL_PEOPLE);
+  } = useQuery(ALL_PEOPLE, {
+    fetchPolicy: 'no-cache',
+    skip
+  });
+  React.useEffect(() => {
+    console.log(new Date(), {skip, data})
+  }, [skip, data]);
 
   const [addPerson] = useMutation(ADD_PERSON, {
     update: (cache, { data: { addPerson: addPersonData } }) => {
@@ -141,20 +151,19 @@ function App() {
         This application can be used to demonstrate an error in Apollo Client.
       </p>
       <div className="add-person">
-        <label htmlFor="name">Name</label>
+        {/* <label htmlFor="name">Name</label>
         <input
           type="text"
           name="name"
           value={name}
           onChange={evt => setName(evt.target.value)}
-        />
+        /> */}
         <button
           onClick={() => {
-            addPerson({ variables: { name } });
-            setName('');
+            setSkip((prevSkip) => !prevSkip)
           }}
         >
-          Add person
+          Toggle skip
         </button>
       </div>
       <h2>Names</h2>
